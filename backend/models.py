@@ -1,4 +1,4 @@
-from .extensions import db
+from extensions import db
 from datetime import datetime,timezone
 
 class BaseModel(db.Model):
@@ -8,9 +8,9 @@ class BaseModel(db.Model):
     updated_at=db.Column(db.DateTime(timezone=True),default=lambda:datetime.now(timezone.utc),onupdate=lambda:datetime.now(timezone.utc))
 
 class User(BaseModel):
-    name=db.Column(db.String,nullable=True)
-    email=db.Column(db.String,required=True,unique=True)
-    password=db.Column(db.String,required=True)
+    name=db.Column(db.String,nullable=False)
+    email=db.Column(db.String,nullable=False,unique=True)
+    password=db.Column(db.String,nullable=False)
     requests=db.relationship("Request",back_populates="user")
 
 class Requests(BaseModel):
@@ -24,25 +24,25 @@ class Requests(BaseModel):
 
 
 class Section(BaseModel):
-    name=db.Column(db.String(20),nullable=True)
+    name=db.Column(db.String(20),nullable=False)
 
     products=db.relationship("Product",back_populates="section")
 
 class Product(BaseModel):
-    name=db.Column(db.String,required=True)
-    price=db.Column(db.Numeric(10,2),nullable=True)
-    stock=db.COlumn(db.Numeric(10,2))
-    expiry=db.COlumn(db.DateTime(timezone=True))
+    name=db.Column(db.String,nullable=False)
+    price=db.Column(db.Numeric(10,2),nullable=False)
+    stock=db.Column(db.Numeric(10,2))
+    expiry=db.Column(db.DateTime(timezone=True))
     unit_of_sale=db.Column(db.Enum("kg","litre","item"))
 
     section_id=db.Column(db.Integer,db.ForeignKey("section.id"))
     section=db.relationship("Section",back_populates="requests")
     sale_items=db.relationship("SaleItem",back_populates="product")
-    
+
 class SaleItem(BaseModel):
     quantity=db.Column(db.Numeric(10,2))
     price_at_sale=db.Column(db.Numeric(10,2),nullable=False)
-    product_id=db.Column(db.Integer(),db.ForeignKey)
+    product_id=db.Column(db.Integer(),db.ForeignKey("product.id"))
     sale_id=db.Column(db.Integer,db.ForeignKey("sale.id"))
     sale=db.relationship("Sale",back_populates="sale_items")
     product=db.relationship("Product",back_populates="sale_items")

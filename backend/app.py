@@ -1,8 +1,14 @@
 from flask import Flask
+from models import db
+from config import LocalDevelopmentConfig
 
 def create_app():
 
     app=Flask(__name__)
+    app.config.from_object(LocalDevelopmentConfig)
+    db.init_app(app)
+    with app.app_context():
+        db.create_all()
     return app
 
 app=create_app()
