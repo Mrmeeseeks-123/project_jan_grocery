@@ -13,6 +13,30 @@ class User(BaseModel):
     password=db.Column(db.String,nullable=False)
     requests=db.relationship("Request",back_populates="user")
 
+    #flask_security_too
+    fs_uniquifier=db.Column(db.String,unique=True,nullable=False)
+    active=db.Column(db.boolean,default=True)
+    roles=db.Relationship("Role",backref="bearer",secondary="user_roles")
+
+class Role(BaseModel):
+    pass
+
+class UserRoles(BaseModel):
+    pass
+
+class Manager(BaseModel):
+    salary=db.Column(db.Integer)
+    address=db.Column(db.String)
+    department=db.Column(db.String)
+
+    user_id=db.Column(db.Integer,db.ForeignKey("user.id"))
+
+class Customer(BaseModel):
+    loyalty_points=db.Column(db.Integer)
+    user_id=db.Column(db.Integer,db.ForeignKey("user.id"))   
+
+
+
 class Requests(BaseModel):
     data=db.Column(db.JSON())
     status=db.Column(db.Enum("approved","rejected","created"))
