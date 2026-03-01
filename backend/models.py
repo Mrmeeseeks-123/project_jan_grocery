@@ -1,5 +1,6 @@
 from extensions import db
 from datetime import datetime,timezone
+from flask_security.core import UserMixin, RoleMixin
 
 class BaseModel(db.Model):
     __abstract__=True
@@ -7,7 +8,7 @@ class BaseModel(db.Model):
     created_at=db.Column(db.DateTime(timezone=True),default=lambda:datetime.now(timezone.utc))
     updated_at=db.Column(db.DateTime(timezone=True),default=lambda:datetime.now(timezone.utc),onupdate=lambda:datetime.now(timezone.utc))
 
-class User(BaseModel):
+class User(BaseModel,UserMixin):
     name=db.Column(db.String,nullable=False)
     email=db.Column(db.String,nullable=False,unique=True)
     password=db.Column(db.String,nullable=False)
@@ -15,14 +16,16 @@ class User(BaseModel):
 
     #flask_security_too
     fs_uniquifier=db.Column(db.String,unique=True,nullable=False)
-    active=db.Column(db.boolean,default=True)
+    active=db.Column(db.Boolean,default=True)
     roles=db.Relationship("Role",backref="bearer",secondary="user_roles")
 
-class Role(BaseModel):
-    pass
+class Role(BaseModel,RoleMixin):
+     name=db.Column(db.String,nullable=False)
+     description=db.Column(db.String,nullable=False)   
 
 class UserRoles(BaseModel):
-    pass
+    user_id=db.Column(db.Integer,db.ForeignKey("user.id"))
+    role_id=db.Column(db.Integer,db.ForeignKey("role.id"))
 
 class Manager(BaseModel):
     salary=db.Column(db.Integer)
@@ -37,7 +40,7 @@ class Customer(BaseModel):
 
 
 
-class Requests(BaseModel):
+class Request(BaseModel):
     data=db.Column(db.JSON())
     status=db.Column(db.Enum("approved","rejected","created"))
     type=db.Column(db.String(20))
@@ -60,7 +63,7 @@ class Product(BaseModel):
     unit_of_sale=db.Column(db.Enum("kg","litre","item"))
 
     section_id=db.Column(db.Integer,db.ForeignKey("section.id"))
-    section=db.relationship("Section",back_populates="requests")
+    section=db.relationship("Section",back_populates="products")
     sale_items=db.relationship("SaleItem",back_populates="product")
 
 class SaleItem(BaseModel):
